@@ -3,8 +3,12 @@ from PyPDF2 import PdfReader
 from supabase import create_client
 from dotenv import load_dotenv
 import os
+import spacy
 
 load_dotenv()
+
+nlp = spacy.load("en_core_web_sm")
+
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL , SUPABASE_KEY)
@@ -22,10 +26,10 @@ def upload():
     if request.method == 'GET':
         return redirect(url_for('home'))
     
-    job_description = request.form.get('job_description', '')
+    jd_text = request.form.get('job_description', '').lower()
     file = request.files.get('file')
 
-    if not job_description:
+    if not jd_text :
         return jsonify({"error": "Job description is empty"}), 400
 
     if not file or file.filename == '':
@@ -39,17 +43,18 @@ def upload():
         text += page.extract_text()
 
     text = text.lower()
-    job_description = job_description.lower()
+    job_description = jd_text
 
     matchWord = []
     unMatch_word = []
 
-    for word in set(job_description.split()):
-        if word in text:
-            matchWord.append(word)
-        else:
-            unMatch_word.append(word)
+    job_description = nlp(job_description)
 
+    for token in set([token.lemma_ for token in job_description if not token.is_stop and not token.is_punct]):
+        if token in text:
+            matchWord.append(token)
+        else:
+            unMatch_word.append(token)
     
     total_words = len(matchWord) + len(unMatch_word)
 
@@ -60,9 +65,10 @@ def upload():
         "KeyWord_exists" : matchWord,
         "KeyWord_not_exist" : unMatch_word
     }
+    
 
     supabase.table("ats_results").insert({
-        "job_description" : job_description,
+        "job_description" : jd_text,
         "score" : score,
         "matched_keywords": matchWord,
         "missing_keywords": unMatch_word
