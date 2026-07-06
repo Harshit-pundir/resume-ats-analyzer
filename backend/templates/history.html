@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data History</title>
+</head>
+<body>
+    <table>
+        
+        <thead>
+            <tr>
+                <th>Job Description</th>
+                <th>Score</th>
+                <th>Matched Keywords</th>
+                <th>Missing Keywords</th>
+                <th>Date</th>
+
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.job_description }}</td>
+                <td>{{ result.score }}</td>
+                <td>{{ result.matched_keywords }}</td>
+                <td>{{ result.missing_keywords }}</td>
+                <td>{{ result.created_at }}</td>
+
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+
+</body>
+</html>
