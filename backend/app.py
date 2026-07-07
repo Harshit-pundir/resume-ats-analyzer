@@ -58,13 +58,16 @@ def score_sections(sections, jd_tokens):
 def generate_tips(unmatched_keywords):
     tech_skills = ["python", "java", "flask", "sql", "django", "react", "node", "javascript", "typescript", "docker", "kubernetes", "aws", "git", "mongodb", "postgresql", "redis", "linux", "rest", "api", "machine learning", "deep learning", "pytorch", "tensorflow", "pandas", "numpy", "scikit", "html", "css", "c++", "c", "golang", "rust", "spring", "mysql"]
 
+    soft_skills = ["expert", "solving", "problem", "analytical", "communication", "leadership", "teamwork", "management", "critical", "creative"]
+
     result= []
     for keyword in unmatched_keywords:
         if keyword in tech_skills:
             tip = f"Add '{keyword}' to your Technical Skills section"
+        elif keyword in soft_skills:
+            tip = f"Highlight '{keyword}' skills in your Professional Summary section"
         else:
-            tip = f"Consider building a project using '{keyword}'"
-        result.append(tip)    
+            tip = f"Consider adding '{keyword}' experience to strengthen your resume"    
 
     return result    
 
