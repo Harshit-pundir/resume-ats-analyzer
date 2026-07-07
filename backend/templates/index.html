@@ -5,111 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATS Resume Checker</title>
     <style>
-    body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 50px auto;
-        padding: 20px;
-    }
-    h1 {
-    color: #2c3e50;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
 
-    input[type="file"], textarea {
-        width: 100%;
-        margin: 10px 0;
-        padding: 8px;
-    }
+        h1 {
+            color: #2c3e50;
+        }
 
-    input[type="submit"] {
-        background-color: #2c3e50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-    }
+        input[type="file"],
+        textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;
+        }
 
-    #result {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f0f0f0;
-        border-radius: 5px;
-    }
-    .tip-card {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 8px 12px;
-        margin: 5px 0;
-        border-radius: 4px;
-    }
-    .keyword-match {
-        background-color: #d4edda;
-        color: #155724;
-        padding: 3px 8px;
-        border-radius: 12px;
-        margin: 2px;
-        display: inline-block;
-    }
+        input[type="submit"] {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .keyword-miss {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 3px 8px;
-        border-radius: 12px;
-        margin: 2px;
-        display: inline-block;
-    }
-</style>
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .tip-card {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .keyword-match {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .keyword-miss {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            background-color: #ddd;
+            border-radius: 5px;
+            height: 20px;
+            margin: 5px 0;
+        }
+
+        .progress-fill {
+            height: 20px;
+            border-radius: 5px;
+            background-color: #2c3e50;
+        }
+    </style>
 </head>
-
 <body>
+
     <h1>ATS Resume Checker</h1>
+
     <form action="">
         <label for="resume">Upload your resume</label><br>
-        <input type="file" id="fname" name="fname" ><br>
+        <input type="file" id="fname" name="fname"><br>
+
         <label for="jd">Upload your job description</label><br>
         <textarea id="job_description" name="job_description" rows="5" cols="50"></textarea>
+
         <input type="submit" value="Submit">
-    </form> 
+    </form>
+
     <div id="result"></div>
+
     <button type="button" onclick="window.location.href='/history'">View History</button>
 
     <script>
-    document.querySelector('form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const btn = document.querySelector('input[type="submit"]');
-        btn.value = "Checking...";
-        btn.disabled = true;
-        const formData = new FormData();
-        formData.append('file', document.querySelector('input[type="file"]').files[0]);
-        formData.append('job_description', document.querySelector('textarea').value);
-        
-        const response = await fetch('http://127.0.0.1:5000/upload', {
-            method: 'POST',
-            body: formData
+        document.querySelector('form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.querySelector('input[type="submit"]');
+            btn.value = "Checking...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', document.querySelector('input[type="file"]').files[0]);
+            formData.append('job_description', document.querySelector('textarea').value);
+
+            const response = await fetch('http://127.0.0.1:5000/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById('result').innerHTML = `<p style="color:red;">${data.error}</p>`;
+                btn.value = "Submit";
+                btn.disabled = false;
+                return;
+            }
+
+            const color = data.Score >= 80 ? 'green' : data.Score >= 50 ? 'orange' : 'red';
+
+            btn.value = "Submit";
+            btn.disabled = false;
+
+            document.getElementById('result').innerHTML = `
+                <h2 style="color:${color}">Score: ${data.Score.toFixed(2)}%</h2>
+
+                <p>Matched: ${data.KeyWord_exists.map(k => `<span class="keyword-match">${k}</span>`).join(' ')}</p>
+                <p>Missing: ${data.KeyWord_not_exist.map(k => `<span class="keyword-miss">${k}</span>`).join(' ')}</p>
+
+                <div>Skills:
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${data.section_scores.skills_score}%"></div>
+                    </div>
+                    ${data.section_scores.skills_score.toFixed(2)}%
+                </div>
+
+                <div>Projects:
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${data.section_scores.projects_score}%"></div>
+                    </div>
+                    ${data.section_scores.projects_score.toFixed(2)}%
+                </div>
+
+                <div>Education:
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${data.section_scores.education_score}%"></div>
+                    </div>
+                    ${data.section_scores.education_score.toFixed(2)}%
+                </div>
+
+                <h3>💡 Tips:</h3>
+                ${data.Unmatched_keyword_tips.map(tip => `<div class="tip-card">• ${tip}</div>`).join('')}
+            `;
         });
-        
-        const data = await response.json();
-        if (data.error) {
-            document.getElementById('result').innerHTML = `<p style="color:red;">${data.error}</p>`;
-            return;
-        }
-        console.log(data);
-        const color = data.Score >= 80 ? 'green' : data.Score >= 50 ? 'orange' : 'red';
-        btn.value = "Submit";
-        btn.disabled = false;
-        document.getElementById('result').innerHTML = `
-            <h2 style="color:${color}">Score: ${data.Score.toFixed(2)}%</h2>
-            <p>Matched: ${data.KeyWord_exists.map(k => `<span class="keyword-match">${k}</span>`).join(' ')}</p>
-            <p>Missing: ${data.KeyWord_not_exist.map(k => `<span class="keyword-miss">${k}</span>`).join(' ')}</p>
-            <p>Skills Score: ${data.section_scores.skills_score.toFixed(2)}%</p>
-            <p>Projects Score: ${data.section_scores.projects_score.toFixed(2)}%</p>
-            <p>Education Score: ${data.section_scores.education_score.toFixed(2)}%</p>
-            <h3>💡 Tips:</h3>
-            ${data.Unmatched_keyword_tips.map(tip => `<div class="tip-card">• ${tip}</div>`).join('')}
-        `;
-    });
     </script>
+
 </body>
 </html>
