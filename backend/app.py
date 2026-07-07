@@ -84,7 +84,7 @@ def upload():
     score = round((len(matched) / total * 100), 2) if total > 0 else 0
 
     section_scores = score_sections(sections, jd_tokens)
-    print(section_scores)
+    
 
     supabase.table("ats_results").insert({
         "job_description": jd_text,
