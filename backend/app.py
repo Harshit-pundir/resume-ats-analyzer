@@ -1,84 +1,112 @@
-from flask import Flask, render_template , request , jsonify , redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from PyPDF2 import PdfReader
 from supabase import create_client
 from dotenv import load_dotenv
 import os
 import spacy
 
+# ── Config ──────────────────────────────────────────────
 load_dotenv()
-
 nlp = spacy.load("en_core_web_sm")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase = create_client(SUPABASE_URL , SUPABASE_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
 
-print(">>>>>>>> THIS IS THE CORRECT APP.PY <<<<<<<<")
+
+# ── Helper Functions ─────────────────────────────────────
+def extract_text_from_pdf(file):
+    reader = PdfReader(file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text.lower().replace("\n", " ")
+
+
+def extract_sections(text):
+    sections = {"skills": "", "projects": "", "education": ""}
+    if "technical skills" in text:
+        sections["skills"] = text.split("technical skills")[-1].split("leadership")[0]
+    if "projects" in text:
+        sections["projects"] = text.split("projects")[-1].split("technical skills")[0]
+    if "education" in text:
+        sections["education"] = text.split("education")[-1].split("projects")[0]
+    return sections
+
+
+def get_tokens(text):
+    doc = nlp(text)
+    return set([token.lemma_ for token in doc if not token.is_stop and not token.is_punct])
+
+
+def match_keywords(tokens, text):
+    matched = [t for t in tokens if t in text]
+    unmatched = [t for t in tokens if t not in text]
+    return matched, unmatched
+
+
+def score_sections(sections, jd_tokens):
+    result = {}
+    for section_name, section_text in sections.items():
+        matched = [t for t in jd_tokens if t in section_text]
+        total = len(jd_tokens)
+        result[section_name + "_score"] = round((len(matched) / total * 100), 2) if total > 0 else 0
+    return result
+
+
+# ── Routes ───────────────────────────────────────────────
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
+
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
+    if request.method == "GET":
+        return redirect(url_for("home"))
 
-    if request.method == 'GET':
-        return redirect(url_for('home'))
-    
-    jd_text = request.form.get('job_description', '').lower()
-    file = request.files.get('file')
+    jd_text = request.form.get("job_description", "").lower()
+    file = request.files.get("file")
 
-    if not jd_text :
+    if not jd_text:
         return jsonify({"error": "Job description is empty"}), 400
-
-    if not file or file.filename == '':
+    if not file or file.filename == "":
         return jsonify({"error": "No file uploaded"}), 400
-    
-    reader = PdfReader(file)
-    text = ""
 
-    
-    for page in reader.pages:
-        text += page.extract_text()
+    text = extract_text_from_pdf(file)
+    sections = extract_sections(text)
+    jd_tokens = get_tokens(jd_text)
 
-    text = text.lower()
-    job_description = jd_text
+    matched, unmatched = match_keywords(jd_tokens, text)
+    total = len(matched) + len(unmatched)
+    score = round((len(matched) / total * 100), 2) if total > 0 else 0
 
-    matchWord = []
-    unMatch_word = []
-
-    job_description = nlp(job_description)
-
-    for token in set([token.lemma_ for token in job_description if not token.is_stop and not token.is_punct]):
-        if token in text:
-            matchWord.append(token)
-        else:
-            unMatch_word.append(token)
-    
-    total_words = len(matchWord) + len(unMatch_word)
-
-    score = (len(matchWord) / total_words) * 100        
-
-    user_data = {
-        "Score" : score,
-        "KeyWord_exists" : matchWord,
-        "KeyWord_not_exist" : unMatch_word
-    }
-    
+    section_scores = score_sections(sections, jd_tokens)
+    print(section_scores)
 
     supabase.table("ats_results").insert({
-        "job_description" : jd_text,
-        "score" : score,
-        "matched_keywords": matchWord,
-        "missing_keywords": unMatch_word
+        "job_description": jd_text,
+        "score": score,
+        "matched_keywords": matched,
+        "missing_keywords": unmatched
     }).execute()
-    return jsonify(user_data)
 
-@app.route('/history', methods=["GET"])
+    return jsonify({
+        "Score": score,
+        "KeyWord_exists": matched,
+        "KeyWord_not_exist": unmatched,
+        "section_scores": section_scores
+    })
+
+
+@app.route("/history", methods=["GET"])
 def history():
     result = supabase.table("ats_results").select("*").execute()
-    return render_template('history.html', results=result.data)
+    return render_template("history.html", results=result.data)
 
+
+# ── Run ──────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
