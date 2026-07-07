@@ -56,9 +56,11 @@ def score_sections(sections, jd_tokens):
     return result
 
 def generate_tips(unmatched_keywords):
+    tech_skills = ["python", "java", "flask", "sql", "django", "react", "node", "javascript", "typescript", "docker", "kubernetes", "aws", "git", "mongodb", "postgresql", "redis", "linux", "rest", "api", "machine learning", "deep learning", "pytorch", "tensorflow", "pandas", "numpy", "scikit", "html", "css", "c++", "c", "golang", "rust", "spring", "mysql"]
+
     result= []
     for keyword in unmatched_keywords:
-        if keyword in ["python", "java", "flask", "sql"]:
+        if keyword in tech_skills:
             tip = f"Add '{keyword}' to your Technical Skills section"
         else:
             tip = f"Consider building a project using '{keyword}'"
