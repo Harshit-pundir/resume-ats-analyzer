@@ -18,7 +18,8 @@
                 <th>Matched Keywords</th>
                 <th>Missing Keywords</th>
                 <th>Date</th>
-
+                <th>Action</th>
+                
             </tr>
         </thead>
         
@@ -40,6 +41,7 @@
                     {% endfor %}
                 </td>
                 <td>{{ result.created_at }}</td>
+                <td><a href="/delete/{{ result.id }}">🗑️ Delete</a></td>
             </tr>
             {% endfor %}
             

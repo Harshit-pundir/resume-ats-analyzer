@@ -128,6 +128,11 @@ def history():
         row['created_at'] = dt.strftime("%d %b %Y, %I:%M %p")
     return render_template("history.html", results=result.data)
 
+@app.route("/delete/<int:id>")
+def delete(id):
+    result = supabase.table("ats_results").delete().eq("id",id).execute()
+    return  redirect(url_for('history'))
+
 
 # ── Run ──────────────────────────────────────────────────
 if __name__ == "__main__":
