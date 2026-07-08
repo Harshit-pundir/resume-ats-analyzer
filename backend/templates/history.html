@@ -11,6 +11,7 @@
     <h1>History</h1>
     <button onclick="window.location.href='/'">← Back</button>
     <input type="text" id="search" placeholder="Search by job description...">
+    <button onclick="sortByScore()">Sort by Score ↓</button>
     <table>
         
         <thead>
@@ -66,6 +67,21 @@
                 }
             });
         });
+
+        function sortByScore() {
+            const tbody = document.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Step 1: sort rows by score (cells[1] = score column)
+            rows.sort((a, b) => {
+                const scoreA = parseFloat(a.cells[1].textContent);
+                const scoreB = parseFloat(b.cells[1].textContent);
+                return scoreB - scoreA; // high to low
+            });
+            
+            // Step 2: wapas append karo
+            rows.forEach(row => tbody.appendChild(row));
+        }
     </script>
 </body>
 </html>
