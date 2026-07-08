@@ -5,6 +5,7 @@ document.querySelector('form').addEventListener('submit', async function (e) {
             btn.value = "Checking...";
             btn.disabled = true;
 
+            document.getElementById('result').innerHTML = '<div class="spinner"></div>';
             const formData = new FormData();
             formData.append('file', document.querySelector('input[type="file"]').files[0]);
             formData.append('job_description', document.querySelector('textarea').value);
