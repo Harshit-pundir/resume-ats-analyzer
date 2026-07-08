@@ -58,5 +58,7 @@ document.querySelector('form').addEventListener('submit', async function (e) {
 
                 <h3>💡 Tips:</h3>
                 ${data.Unmatched_keyword_tips.map(tip => `<div class="tip-card">• ${tip}</div>`).join('')}
+
+                <p><strong>${data.Feedback[0]}</strong></p>
             `;
         });

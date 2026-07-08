@@ -74,6 +74,19 @@ def generate_tips(unmatched_keywords):
 
     return result    
 
+def generate_feedback(score):
+
+    tips = []
+    if score >= 80:
+        tips.append( "Great match! Your resume is well-suited for this role.")
+    elif score <= 79 and score >= 50:
+        tips.append("Good match! Consider adding some missing keywords.")
+    else:
+        tips.append("Your resume needs significant improvement for this role.")
+
+    return tips        
+
+
 # ── Routes ───────────────────────────────────────────────
 @app.route("/")
 def home():
@@ -101,6 +114,8 @@ def upload():
     total = len(matched) + len(unmatched)
     score = round((len(matched) / total * 100), 2) if total > 0 else 0
 
+    feedback = generate_feedback(score)
+
     section_scores = score_sections(sections, jd_tokens)
     unmatched_word_tips = generate_tips(unmatched)
 
@@ -118,7 +133,8 @@ def upload():
         "KeyWord_exists": matched,
         "KeyWord_not_exist": unmatched,
         "section_scores": section_scores,
-        "Unmatched_keyword_tips" : unmatched_word_tips
+        "Unmatched_keyword_tips" : unmatched_word_tips,
+        "Feedback" : feedback
     })
 
 
