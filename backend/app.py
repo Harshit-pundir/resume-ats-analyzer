@@ -78,11 +78,11 @@ def generate_feedback(score):
 
     tips = []
     if score >= 80:
-        tips.append( "Great match! Your resume is well-suited for this role.")
+        tips.append( "Great match! Your resume is well-suited for this role.✅")
     elif score <= 79 and score >= 50:
-        tips.append("Good match! Consider adding some missing keywords.")
+        tips.append("Good match! Consider adding some missing keywords.⚠️ ")
     else:
-        tips.append("Your resume needs significant improvement for this role.")
+        tips.append("Your resume needs significant improvement for this role.❌ ")
 
     return tips        
 
