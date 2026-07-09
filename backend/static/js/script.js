@@ -62,3 +62,21 @@ document.querySelector('form').addEventListener('submit', async function (e) {
                 <p style="color:${color}"><strong>${data.Feedback[0]}</strong></p>
             `;
         });
+
+        const textarea = document.getElementById('job_description');
+
+        textarea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            textarea.style.borderColor = '#2c3e50';
+        });
+
+        textarea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                textarea.value = e.target.result;
+            };
+            reader.readAsText(file);
+            textarea.style.borderColor = '';
+        });
