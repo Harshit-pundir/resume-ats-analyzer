@@ -21,9 +21,13 @@ app.secret_key = os.getenv("SECRET_KEY")
 def extract_text_from_pdf(file):
     reader = PdfReader(file)
     text = ""
+
     for page in reader.pages:
-        text += page.extract_text()
-    return text.lower().replace("\n", " ")
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + " "
+
+    return text.lower()
 
 
 def extract_sections(text):
