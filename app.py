@@ -63,7 +63,7 @@ supabase = create_client(
 # PDF TEXT EXTRACTION
 # ==========================================================
 
-def extract_text_from_pdf(file):
+def extract_text_from_pdf(file) -> str:
     """
     Extract text from uploaded PDF.
 
@@ -154,7 +154,7 @@ def extract_section(text, headings):
 # EXTRACT ALL SECTIONS
 # ==========================================================
 
-def extract_resume_sections(text):
+def extract_resume_sections(text) :
     """
     Extract all important sections
     from the resume.
@@ -211,54 +211,84 @@ def extract_resume_sections(text):
     return sections
 
  
- # ==========================================================
-# LOAD KNOWING SKILLS
+# ==========================================================
+# LOAD PREDEFINED SKILLS
 # ==========================================================
 
 
-def load_skills():
+def load_skills() -> list:
     """
     Load all predefined skills from skills.json
     """
 
-    with open("skills.json", "r", encoding="utf-8") as file:
-        known_skills = json.load(file)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    skills_file = os.path.join(base_dir, "skills.json")
 
-    return known_skills
+    try:
+        with open(skills_file, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    except FileNotFoundError:
+        print("skills.json file not found.")
+        return []
+
+    except json.JSONDecodeError:
+        print("Invalid JSON format.")
+        return []
 
 
-def extract_skills(resume_text, jd_text, known_skills):
+def extract_skills(text : str, known_skills : list) -> set:
     """
-    Extract skills present in
-    Resume and Job Description.
+    Extract all predefined skills
+    from given text.
+
+    Parameters
+    ----------
+    text : Resume or JD text
+
+    known_skills : list
+
+    Returns
+    -------
+    set
     """
 
-    # Convert to lowercase
-    resume_text = resume_text.lower()
-    jd_text = jd_text.lower()
+    text = text.lower()
 
-    # Store unique skills
-    resume_skills = set()
-    jd_skills = set()
+    found_skills = set()
 
-    # Check every skill
     for skill in known_skills:
 
         pattern = rf"\b{re.escape(skill.lower())}\b"
 
-        if re.search(pattern, resume_text):
-            resume_skills.add(skill)
+        if re.search(pattern, text):
+            found_skills.add(skill)
 
-        if re.search(pattern, jd_text):
-            jd_skills.add(skill)
-
-    return resume_skills, jd_skills
+    return found_skills
 
 
-def match_skills(resume_skills, jd_skills):
+def match_skills(resume_skills: set,jd_skills: set):
+    """
+    Compare resume skills with
+    job description skills.
+
+    Parameters
+    ----------
+    resume_skills : set
+
+    jd_skills : set
+
+    Returns
+    -------
+    matched_skills : set
+
+    missing_skills : set
+    """
 
     matched_skills = resume_skills & jd_skills
 
     missing_skills = jd_skills - resume_skills
 
     return matched_skills, missing_skills
+
+
