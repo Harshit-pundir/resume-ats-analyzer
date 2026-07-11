@@ -511,3 +511,183 @@ def calculate_ats_score(skill_score: float,section_score: float,contact_score: f
     final_score = (skill_score * SKILL_WEIGHT +section_score * SECTION_WEIGHT +contact_score * CONTACT_WEIGHT +completeness_score * COMPLETENESS_WEIGHT) / 100
 
     return round(final_score, 2)
+
+
+# ==========================================================
+# GENERATE SCORE FEEDBACK
+# ==========================================================
+
+def generate_score_feedback(score: float) -> list:
+    """
+    Generate feedback based on
+    the final ATS score.
+    """
+
+    feedback = []
+
+    if score >= 90:
+
+        feedback.append("Excellent ATS score! Your resume is highly optimized for this job.")
+        feedback.append("You have matched most of the required skills and resume sections.")
+
+    elif score >= 75:
+
+        feedback.append("Very good ATS score.")
+        feedback.append("Your resume has a strong match with the job description.")
+
+    elif score >= 60:
+
+        feedback.append("Good ATS score.")
+        feedback.append("Your resume is relevant, but adding missing skills can improve it.")
+
+    elif score >= 40:
+
+        feedback.append("Average ATS score.")
+        feedback.append("Your resume needs more improvements to match the job requirements.")
+
+    else:
+
+        feedback.append("Low ATS score.")
+        feedback.append("Your resume is not well aligned with the job description.")
+        feedback.append("Consider adding more relevant skills, projects, and experience.")
+
+    return feedback
+
+
+
+# ==========================================================
+# GENERATE SKILL FEEDBACK
+# ==========================================================
+
+def generate_skill_feedback(matched_skills: set,missing_skills: set) -> list:
+    """
+    Generate feedback based on
+    matched and missing skills.
+    """
+
+    feedback = []
+
+    # Tell user how many skills matched
+    feedback.append(
+        f"You matched {len(matched_skills)} required skill(s)."
+    )
+
+    # If no skills are missing
+    if not missing_skills:
+
+        feedback.append(
+            "Excellent! You matched all the required technical skills."
+        )
+
+        return feedback
+
+    # Suggestions for missing skills
+    for skill in sorted(missing_skills):
+
+        feedback.append(
+            f"Consider adding '{skill}' if you have experience with it."
+        )
+
+    return feedback
+
+# ==========================================================
+# GENERATE RESUME FEEDBACK
+# ==========================================================
+
+def generate_resume_feedback(sections: dict,contact_details: dict) -> list:
+    """
+    Generate feedback based on
+    resume structure and contact details.
+    """
+
+    feedback = []
+
+    # -------------------------
+    # Resume Sections
+    # -------------------------
+
+    if not sections["summary"].strip():
+        feedback.append("Add a professional summary.")
+
+    if not sections["skills"].strip():
+        feedback.append("Add a Technical Skills section.")
+
+    if not sections["projects"].strip():
+        feedback.append("Include at least one technical project.")
+
+    if not sections["education"].strip():
+        feedback.append("Add your education details.")
+
+    if not sections["experience"].strip():
+        feedback.append("Include work experience or internships.")
+
+    # -------------------------
+    # Contact Details
+    # -------------------------
+
+    if not contact_details["email"]:
+        feedback.append("Add your email address.")
+
+    if not contact_details["phone"]:
+        feedback.append("Add your phone number.")
+
+    if not contact_details["linkedin"]:
+        feedback.append("Include your LinkedIn profile.")
+
+    if not contact_details["github"]:
+        feedback.append("Add your GitHub profile.")
+
+    if not contact_details["portfolio"]:
+        feedback.append("Add your portfolio website.")
+
+    # If everything is present
+    if not feedback:
+        feedback.append(
+            "Excellent! Your resume has all the important sections and contact details."
+        )
+
+    return feedback
+
+# ==========================================================
+# GENERATE FINAL FEEDBACK
+# ==========================================================
+
+def generate_feedback(score: float,matched_skills: set,missing_skills: set,sections: dict,contact_details: dict) -> list:
+    """
+    Generate complete ATS feedback.
+
+    Combines:
+    - Score feedback
+    - Skill feedback
+    - Resume feedback
+    """
+
+    feedback = []
+
+    # Overall ATS Score Feedback
+    feedback.extend(
+        generate_score_feedback(score)
+    )
+
+    # Skill Feedback
+    feedback.extend(
+        generate_skill_feedback(
+            matched_skills,
+            missing_skills
+        )
+    )
+
+    # Resume Feedback
+    feedback.extend(
+        generate_resume_feedback(
+            sections,
+            contact_details
+        )
+    )
+
+    if not feedback:
+        feedback.append(
+            "Excellent! No improvements required."
+        )
+
+    return feedback
