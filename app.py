@@ -275,7 +275,7 @@ def extract_skills(text : str, known_skills : list) -> set:
     return found_skills
 
 
-def match_skills(resume_skills: set,jd_skills: set):
+def match_skills(resume_skills: set,jd_skills: set) -> tuple:
     """
     Compare resume skills with
     job description skills.
@@ -368,12 +368,17 @@ def extract_contact_details(text: str) -> dict:
 
     portfolio = re.search( r"https?://[^\s]+",text)
 
-    if portfolio:
+    urls = re.findall(r"https?://[^\s]+", text)
 
-        url = portfolio.group()
+    for url in urls:
 
-        if ("linkedin.com" not in url and"github.com" not in url):
+        if (
+            "linkedin.com" not in url
+            and
+            "github.com" not in url
+        ):
             contacts["portfolio"] = url
+            break
 
     return contacts
 
@@ -394,7 +399,7 @@ def calculate_skill_score(matched_skills : set,jd_skills : set) -> float:
     """
 
     # Prevent division by zero
-    if len(jd_skills) == 0:
+    if not jd_skills:
         return 0
     
 
@@ -420,7 +425,7 @@ def calculate_section_score(sections : dict) -> float:
     """
 
     total_sections = len(sections)
-    available_section = 0
+    available_sections = 0
 
     # Check every section
     for section in sections.values():
@@ -503,16 +508,6 @@ def calculate_ats_score(skill_score: float,section_score: float,contact_score: f
     using weighted scoring.
     """
 
-    final_score = (
-
-        skill_score * SKILL_WEIGHT +
-
-        section_score * SECTION_WEIGHT +
-
-        contact_score * CONTACT_WEIGHT +
-
-        completeness_score * COMPLETENESS_WEIGHT
-
-    ) / 100
+    final_score = (skill_score * SKILL_WEIGHT +section_score * SECTION_WEIGHT +contact_score * CONTACT_WEIGHT +completeness_score * COMPLETENESS_WEIGHT) / 100
 
     return round(final_score, 2)
