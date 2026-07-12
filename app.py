@@ -8,7 +8,7 @@
 # Import Required Libraries
 # -----------------------------
 
-from flask import Flask , request , jsonify
+from flask import Flask, request, jsonify, render_template
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from supabase import create_client
@@ -680,6 +680,13 @@ def generate_feedback(score: float,matched_skills: set,missing_skills: set,secti
 
     return feedback
 
+# ==========================================================
+# HOME PAGE
+# ==========================================================
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 # ==========================================================
 # UPLOAD RESUME
@@ -773,3 +780,6 @@ def upload_resume():
         "contact_details": contact_details,
         "feedback": feedback
     })
+
+if __name__ == "__main__":
+    app.run(debug=True)
