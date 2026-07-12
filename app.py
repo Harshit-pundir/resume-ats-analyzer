@@ -13,9 +13,17 @@ from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from supabase import create_client
 import json
+import logging
 import os
 import re
 import spacy
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 # -----------------------------
@@ -53,16 +61,30 @@ app.secret_key = os.getenv("SECRET_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-supabase = create_client(SUPABASE_URL,SUPABASE_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ==========================================================
-# ATS SCORE WEIGHTS
+# CONSTANTS
 # ==========================================================
+
+PERCENT_MULTIPLIER = 100
+ROUND_DECIMALS = 2
 
 SKILL_WEIGHT = 60
 SECTION_WEIGHT = 20
 CONTACT_WEIGHT = 10
 COMPLETENESS_WEIGHT = 10
+
+RESUME_SECTION_WEIGHT = 50
+RESUME_CONTACT_WEIGHT = 20
+RESUME_COMPLETENESS_WEIGHT = 30
+
+EXCELLENT_SCORE_THRESHOLD = 90
+VERY_GOOD_SCORE_THRESHOLD = 75
+GOOD_SCORE_THRESHOLD = 60
+AVERAGE_SCORE_THRESHOLD = 40
+
+SKILLS_FILE_NAME = "skills.json"
 
 # ==========================================================
 # PDF TEXT EXTRACTION
@@ -210,24 +232,30 @@ def extract_resume_sections(text: str) -> dict:
 # ==========================================================
 
 
-def load_skills() -> list:
+def load_skills() -> list[str]:
     """
-    Load all predefined skills from skills.json
+    Load predefined skills from the local skills.json file.
+
+    Returns
+    -------
+    list[str]
+        Skill names loaded from skills.json. Returns an empty list if the
+        file is missing or contains invalid JSON.
     """
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    skills_file = os.path.join(base_dir, "skills.json")
+    skills_file = os.path.join(base_dir, SKILLS_FILE_NAME)
 
     try:
         with open(skills_file, "r", encoding="utf-8") as file:
             return json.load(file)
 
     except FileNotFoundError:
-        print("skills.json file not found.")
+        logger.exception("skills.json file not found.")
         return []
 
     except json.JSONDecodeError:
-        print("Invalid JSON format.")
+        logger.exception("Invalid JSON format.")
         return []
 
 
