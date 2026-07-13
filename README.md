@@ -274,6 +274,8 @@ Passionate about Artificial Intelligence, Machine Learning, Backend Development,
 - **LeetCode**  
   https://leetcode.com/Harshitpundir
 
+- 📧 **Email**  
+  harshitpundir36@gmail.com
 ---
 
 <div align="center">
