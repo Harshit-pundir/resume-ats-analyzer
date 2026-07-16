@@ -886,8 +886,14 @@ def upload_resume():
 
 @app.route("/history")
 def history():
-    response = supabase.table("resume_history").select("*").order("created_at",desc=True).execute()
-    return jsonify(response.data)
+    try:
+        response = supabase.table("resume_history").select("*").order("created_at", desc=True).execute()
+        history_items = response.data or []
+    except Exception:
+        logger.exception("Failed to fetch resume history from Supabase.")
+        history_items = []
+
+    return render_template("history.html", history=history_items)
 
 if __name__ == "__main__":
     app.run(debug=True)
