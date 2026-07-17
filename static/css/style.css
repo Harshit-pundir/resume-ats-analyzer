@@ -490,24 +490,34 @@ button:disabled {
 }
 
 .score-ring-inner {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
     width: 94px;
     height: 94px;
-    place-items: center;
+
     border-radius: 50%;
     background: #fff;
+
+    gap: 4px;
 }
 
 .score-ring strong {
     color: var(--navy);
-    font-size: 2rem;
+    font-size: 2.2rem;
+    font-weight: 800;
     line-height: 1;
 }
 
 .score-ring small {
     color: var(--muted);
-    font-weight: 800;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 .result-header h2 {

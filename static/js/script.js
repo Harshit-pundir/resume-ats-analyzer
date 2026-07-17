@@ -76,10 +76,8 @@ const renderResult = (data) => {
         <div class="result-header">
             <div class="score-ring" style="--score-angle: ${score * 3.6}deg">
                 <div class="score-ring-inner">
-                    <div>
-                        <strong>${formatScore(score)}</strong>
-                        <small>Score</small>
-                    </div>
+                    <strong>${Math.round(score)}%</strong>
+                    <small>ATS SCORE</small>
                 </div>
             </div>
             <div>
