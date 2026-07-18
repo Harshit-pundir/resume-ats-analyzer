@@ -1,25 +1,28 @@
 <div align="center">
 
-# 🚀 AI Resume ATS Analyzer
+# 🚀 ResumePilot AI
 
 ### *Analyze. Improve. Get Shortlisted.*
 
-An AI-powered Resume ATS Analyzer that evaluates your resume, compares it with a Job Description, detects missing skills, and generates actionable feedback to improve your chances of passing Applicant Tracking Systems (ATS).
+An **NLP-powered Resume ATS Analyzer** that evaluates resumes, compares them with Job Descriptions, detects missing skills, and provides actionable feedback to improve ATS compatibility.
 
 <p align="center">
+
+<a href="https://resumepilot-ai-gr6u.onrender.com/">
+<img src="https://img.shields.io/badge/🚀-Live_Demo-success?style=for-the-badge">
+</a>
+
+</p>
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![Flask](https://img.shields.io/badge/Flask-3.x-black?logo=flask)
 ![spaCy](https://img.shields.io/badge/NLP-spaCy-09A3D5)
 ![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?logo=supabase)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript)
-![License](https://img.shields.io/badge/License-MIT-success)
-
-</p>
 
 <p align="center">
-  <strong>Most resumes are rejected before a recruiter even reads them.</strong><br>
-  This project helps you understand <strong>why</strong> and shows you <strong>how to improve.</strong>
+<strong>Most resumes are rejected before a recruiter even reads them.</strong><br>
+This project helps you understand <strong>why</strong> and shows you <strong>how to improve.</strong>
 </p>
 
 </div>
@@ -30,7 +33,7 @@ An AI-powered Resume ATS Analyzer that evaluates your resume, compares it with a
 
 Applicant Tracking Systems (ATS) automatically scan resumes before they reach recruiters. A well-written resume can still be rejected if it lacks the right structure or keywords.
 
-**AI Resume ATS Analyzer** helps job seekers evaluate their resumes by analyzing important sections, extracting technical skills, comparing resumes with job descriptions, and generating detailed ATS scores with personalized recommendations.
+**ResumePilot AI** helps job seekers evaluate their resumes by analyzing important sections, extracting technical skills, comparing resumes with job descriptions, and generating detailed ATS scores with personalized recommendations.
 
 Whether you're applying for internships or full-time software engineering roles, this tool provides practical insights to improve your resume.
 
@@ -174,7 +177,7 @@ resume-ats-analyzer/
 ## 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/Harshit-pundir/resume-ats-analyzer.git
+git clone https://github.com/Harshit-pundir/ResumePilot-AI.git
 cd resume-ats-analyzer
 ```
 
