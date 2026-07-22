@@ -7,17 +7,20 @@
 # -----------------------------
 # Import Required Libraries
 # -----------------------------
-
+   
 from flask import Flask, request, jsonify, render_template
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from supabase import create_client
+from io import BytesIO
+from flask import send_file
+from reportlab.platypus import (SimpleDocTemplate,Paragraph,Spacer)
+from reportlab.lib.styles import getSampleStyleSheet 
 import json
 import logging
 import os
 import re
 import spacy
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
+latest_report = {}
 # -----------------------------
 # Load Environment Variables
 # -----------------------------
@@ -125,7 +128,7 @@ def extract_text_from_pdf(file) -> str:
             logger.exception("Error while extracting text from a PDF page.")
             continue
         
-    print(complete_text)
+    
     return complete_text.lower()
 
 
@@ -765,6 +768,7 @@ def home() -> str:
 
 @app.route("/upload", methods=["POST"])
 def upload_resume():
+    global latest_report
 
     # Resume PDF
     file = request.files.get("resume")
@@ -857,7 +861,7 @@ def upload_resume():
 
     assessment = generate_score_feedback(resume_score, "resume_analysis")
     recommendations = generate_resume_feedback(sections,contact_details)
-    
+
     section_status = {
         "Summary": bool(sections["summary"].strip()),
         "Skills": bool(sections["skills"].strip()),
@@ -878,6 +882,22 @@ def upload_resume():
 
     except Exception:
         logger.exception("Failed to save analysis to Supabase.")    
+
+    latest_report = {
+        "resume_name": file.filename,
+        "score": resume_score,
+        "overall_assessment": {
+            "title": assessment[0],
+            "message": assessment[1]
+        },
+        "section_score": section_score,
+        "contact_score": contact_score,
+        "completeness_score": completeness_score,
+        "sections": section_status,
+        "resume_skills": sorted(resume_skills),
+        "missing_skills": [],
+        "recommendations": recommendations
+    }    
 
     return jsonify({
         "mode": "resume_analysis",
@@ -902,6 +922,68 @@ def history():
         history_items = []
 
     return render_template("history.html", history=history_items)
+
+@app.route("/download-report")
+def download_report():
+
+    global latest_report
+
+    if not latest_report:
+        return {"error": "No report available."}, 400
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+
+    story = []
+
+    story.append(Paragraph("<b>ResumePilot AI</b>", styles["Title"]))
+    story.append(Spacer(1, 20))
+
+    story.append(Paragraph(
+        f"<b>Resume:</b> {latest_report['resume_name']}",
+        styles["BodyText"]
+    ))
+
+    story.append(Paragraph(
+        f"<b>ATS Score:</b> {latest_report['score']}%",
+        styles["BodyText"]
+    ))
+
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph(
+        latest_report["overall_assessment"]["title"],
+        styles["Heading2"]
+    ))
+
+    story.append(Paragraph(
+        latest_report["overall_assessment"]["message"],
+        styles["BodyText"]
+    ))
+
+    story.append(Spacer(1, 20))
+
+    story.append(Paragraph("<b>Recommendations</b>", styles["Heading2"]))
+
+    for item in latest_report["recommendations"]:
+        story.append(
+            Paragraph(f"• {item}", styles["BodyText"])
+        )
+
+    doc.build(story)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="ResumePilot_Report.pdf",
+        mimetype="application/pdf"
+    )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

@@ -181,7 +181,7 @@ const renderResult = (data) => {
         ${recommendationsCard(recommendations)}
 
         <div class="result-actions">
-            <button type="button" class="report-button">Download ATS Report</button>
+            <button type="button" class="report-button" id="download-report-btn">Download ATS Report</button>
             <button type="button" class="analyze-again-button" id="analyze-again-btn">Analyze Another Resume</button>
         </div>
     `;
@@ -190,7 +190,18 @@ const renderResult = (data) => {
 
     if (analyzeAgainBtn) {
         analyzeAgainBtn.addEventListener("click", () => {
-            document.getElementById("checker").scrollIntoView({ behavior: "smooth", block: "start" });
+            document.getElementById("checker").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+    }
+
+    const downloadBtn = document.getElementById("download-report-btn");
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", () => {
+            window.location.href = "/download-report";
         });
     }
 
