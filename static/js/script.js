@@ -50,9 +50,9 @@ const resumeSectionsCard = (sections) => {
     }
 
     return `
-        <article class="feedback-card">
+        <article class="feedback-card resume-sections-card">
             <h3>Resume Sections</h3>
-            <div class="feedback-list">
+            <div class="resume-sections-grid">
                 ${sectionNames.map((section) => {
                     const isPresent = sections[section];
 
@@ -61,7 +61,7 @@ const resumeSectionsCard = (sections) => {
                     }
 
                     return `
-                        <div style="color: ${isPresent ? "#087d75" : "#bb3d3d"};">
+                        <div class="resume-section ${isPresent ? "is-present" : "is-missing"}">
                             ${isPresent ? "✓" : "✗"} ${section}
                         </div>
                     `;
@@ -86,7 +86,7 @@ const recommendationsCard = (recommendations) => {
         <article class="feedback-card">
             <h3>Recommendations</h3>
             ${recommendations.map((item) => `
-                <div class="recommendation-card" style="margin-top: 10px;">
+                <div class="recommendation-item">
                     <strong style="color: #087d75;">✓</strong>
                     <span>${escapeHtml(item)}</span>
                 </div>
@@ -126,7 +126,7 @@ const renderResult = (data) => {
             : [];
     const missing = Array.isArray(data.missing_skills) ? data.missing_skills : [];
     const recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
-    const title = data.mode === "job_match" ? "ATS job match score" : "Resume score";
+    const title = data.mode === "job_match" ? "ATS Job Match Analysis" : "ATS Resume Analysis";
 
     // Use the new backend assessment field.
     const summary = data.overall_assessment || "Your resume analysis is ready.";
@@ -143,7 +143,10 @@ const renderResult = (data) => {
             <div>
                 <h2>${title}</h2>
                 <div class="assessment-card">
-                    <span>Overall Assessment</span>
+                    <div class="assessment-heading">
+                        <span class="assessment-status" aria-hidden="true">&#10003;</span>
+                        <span>Overall Assessment</span>
+                    </div>
                     <p>${escapeHtml(summary)}</p>
                 </div>
             </div>
@@ -160,17 +163,28 @@ const renderResult = (data) => {
 
         <div class="keyword-grid">
             <article class="keyword-card">
-                <h3>${data.mode === "job_match" ? "Matched skills" : "Detected skills"}</h3>
+                <h3>${data.mode === "job_match" ? `Matched Skills (${matched.length})` : `Detected Skills (${matched.length})`}</h3>
                 ${chipList(matched)}
             </article>
             <article class="keyword-card">
-                <h3>Missing skills</h3>
+                <h3>Missing Skills (${missing.length})</h3>
                 ${chipList(missing, true)}
             </article>
         </div>
 
         ${recommendationsCard(recommendations)}
+
+        <div class="result-actions">
+            <button type="button" class="report-button">Download ATS Report</button>
+            <button type="button" class="analyze-again-button" id="analyze-again-btn">Analyze Another Resume</button>
+        </div>
     `;
+
+    const analyzeAgainBtn = document.getElementById("analyze-again-btn");
+
+    analyzeAgainBtn.addEventListener("click", () => {
+        document.getElementById("checker").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
 
     result.scrollIntoView({ behavior: "smooth", block: "start" });
 };
