@@ -142,7 +142,10 @@ const renderResult = (data) => {
             </div>
             <div>
                 <h2>${title}</h2>
-                <p>${escapeHtml(summary)}</p>
+                <div class="assessment-card">
+                    <span>Overall Assessment</span>
+                    <p>${escapeHtml(summary)}</p>
+                </div>
             </div>
         </div>
 
